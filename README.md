@@ -1,1 +1,1 @@
-# workerman-core-dump-cleaner
+# CoreDump文件清理
