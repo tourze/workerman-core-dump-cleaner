@@ -138,19 +138,15 @@ class CoreDumpCleanerTest extends TestCase
         file_put_contents($coreFile, 'core dump content');
         file_put_contents($coreFile1, 'core dump content 1');
 
-        // 创建 cleaner 对象
-        $cleaner = $this->getMockBuilder(CoreDumpCleaner::class)
-            ->setConstructorArgs([$this->tempDir, '*/30 * * * * *', 20, false])
-            ->onlyMethods(['deleteFile'])
-            ->getMock();
-
-        // 设置期望，deleteFile 将被调用两次并返回 true
-        $cleaner->expects($this->exactly(2))
-            ->method('deleteFile')
-            ->willReturn(true);
+        // 创建真实的 cleaner 对象，禁用定时任务注册
+        $cleaner = new CoreDumpCleaner($this->tempDir, '*/30 * * * * *', 20, false);
 
         // 设置检查文件列表
         $cleaner->setCheckFiles(['core', 'core.1', 'core.2']);
+
+        // 确认文件存在
+        $this->assertFileExists($coreFile);
+        $this->assertFileExists($coreFile1);
 
         // 执行清理
         $results = $cleaner->cleanFiles();
@@ -159,6 +155,10 @@ class CoreDumpCleanerTest extends TestCase
         $this->assertTrue($results[$this->tempDir . '/core']);
         $this->assertTrue($results[$this->tempDir . '/core.1']);
         $this->assertFalse($results[$this->tempDir . '/core.2']);
+
+        // 确认文件已被删除
+        $this->assertFileDoesNotExist($coreFile);
+        $this->assertFileDoesNotExist($coreFile1);
     }
 
     /**

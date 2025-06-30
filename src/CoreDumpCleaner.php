@@ -86,7 +86,15 @@ class CoreDumpCleaner
      */
     public function deleteFile(string $file): bool
     {
-        return @unlink($file);
+        if (!file_exists($file)) {
+            return false;
+        }
+
+        try {
+            return unlink($file);
+        } catch (\Exception) {
+            return false;
+        }
     }
 
     /**
