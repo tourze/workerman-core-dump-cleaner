@@ -3,13 +3,12 @@
   "description": "CoreDump文件清理",
   "license": "MIT",
   "require": {
-    "php": "^8.1",
     "workerman/crontab": "^1.0.7",
     "workerman/workerman": "^5.1"
   },
   "require-dev": {
     "phpstan/phpstan": "^2.1",
-    "phpunit/phpunit": "^10.0"
+    "phpunit/phpunit": "^11.5"
   },
   "autoload": {
     "psr-4": {

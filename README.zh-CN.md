@@ -41,10 +41,37 @@ new CoreDumpCleaner('/path/to/project', '*/30 * * * * *');
 
 ## 配置说明
 
-构造函数接受两个参数：
+构造函数接受以下参数：
 
 - `$projectDir`（字符串）：core dump 文件所在的目录
 - `$rule`（字符串）：清理计划的 cron 表达式（默认：`*/30 * * * * *`）
+- `$maxCoreFiles`（整数）：监控的最大 core 文件数量（默认：20）
+- `$registerCrontab`（布尔值）：是否自动注册定时任务（默认：true）
+
+### 高级用法
+
+```php
+<?php
+
+use Tourze\Workerman\CoreDumpCleaner\CoreDumpCleaner;
+
+// 自定义配置
+$cleaner = new CoreDumpCleaner(
+    projectDir: '/path/to/project',
+    rule: '0 */10 * * * *',           // 每10分钟执行一次
+    maxCoreFiles: 50,                 // 监控最多50个core文件
+    registerCrontab: true             // 自动注册定时任务
+);
+
+// 用于测试（禁用定时任务注册）
+$cleaner = new CoreDumpCleaner(
+    projectDir: '/path/to/project',
+    registerCrontab: false
+);
+
+// 手动清理
+$results = $cleaner->cleanFiles();
+```
 
 ## 贡献
 

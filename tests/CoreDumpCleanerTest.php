@@ -2,13 +2,17 @@
 
 namespace Tourze\Workerman\CoreDumpCleaner\Tests;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Tourze\Workerman\CoreDumpCleaner\CoreDumpCleaner;
 
 /**
  * 测试 CoreDumpCleaner 类
+ *
+ * @internal
  */
-class CoreDumpCleanerTest extends TestCase
+#[CoversClass(CoreDumpCleaner::class)]
+final class CoreDumpCleanerTest extends TestCase
 {
     /**
      * 测试文件临时目录
@@ -24,7 +28,7 @@ class CoreDumpCleanerTest extends TestCase
 
         // 创建临时目录
         $this->tempDir = sys_get_temp_dir() . '/core_dump_test_' . uniqid();
-        mkdir($this->tempDir, 0777, true);
+        mkdir($this->tempDir, 0o777, true);
     }
 
     /**
@@ -34,8 +38,6 @@ class CoreDumpCleanerTest extends TestCase
     {
         // 删除临时目录及其内容
         $this->removeDirectory($this->tempDir);
-
-        parent::tearDown();
     }
 
     /**
@@ -47,15 +49,16 @@ class CoreDumpCleanerTest extends TestCase
             return;
         }
 
-        $files = scandir($dir);
-        foreach ($files as $file) {
-            if ($file !== '.' && $file !== '..') {
-                $path = $dir . '/' . $file;
-                if (is_dir($path)) {
-                    $this->removeDirectory($path);
-                } else {
-                    unlink($path);
-                }
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->isDir()) {
+                rmdir($file->getPathname());
+            } else {
+                unlink($file->getPathname());
             }
         }
 
@@ -154,42 +157,6 @@ class CoreDumpCleanerTest extends TestCase
         // 验证结果
         $this->assertTrue($results[$this->tempDir . '/core']);
         $this->assertTrue($results[$this->tempDir . '/core.1']);
-        $this->assertFalse($results[$this->tempDir . '/core.2']);
-
-        // 确认文件已被删除
-        $this->assertFileDoesNotExist($coreFile);
-        $this->assertFileDoesNotExist($coreFile1);
-    }
-
-    /**
-     * 测试实际清理文件功能
-     */
-    public function testActualCleanFiles(): void
-    {
-        // 创建模拟的 CoreDump 文件
-        $coreFile = $this->tempDir . '/core';
-        $coreFile1 = $this->tempDir . '/core.1';
-        $coreFile2 = $this->tempDir . '/core.2';
-
-        file_put_contents($coreFile, 'core dump content');
-        file_put_contents($coreFile1, 'core dump content 1');
-        // core.2 文件不存在
-
-        // 禁用定时任务注册
-        $cleaner = new CoreDumpCleaner($this->tempDir, '*/30 * * * * *', 20, false);
-        $cleaner->setCheckFiles(['core', 'core.1', 'core.2']);
-
-        // 确认文件存在
-        $this->assertFileExists($coreFile);
-        $this->assertFileExists($coreFile1);
-        $this->assertFileDoesNotExist($coreFile2);
-
-        // 执行清理
-        $results = $cleaner->cleanFiles();
-
-        // 验证结果
-        $this->assertTrue($results[$coreFile]);
-        $this->assertTrue($results[$coreFile1]);
         $this->assertFalse($results[$this->tempDir . '/core.2']);
 
         // 确认文件已被删除

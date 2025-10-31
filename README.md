@@ -4,6 +4,8 @@
 
 [![Latest Version](https://img.shields.io/packagist/v/tourze/workerman-core-dump-cleaner.svg?style=flat-square)](https://packagist.org/packages/tourze/workerman-core-dump-cleaner)
 [![Total Downloads](https://img.shields.io/packagist/dt/tourze/workerman-core-dump-cleaner.svg?style=flat-square)](https://packagist.org/packages/tourze/workerman-core-dump-cleaner)
+[![PHP Version](https://img.shields.io/packagist/php-v/tourze/workerman-core-dump-cleaner.svg?style=flat-square)](https://packagist.org/packages/tourze/workerman-core-dump-cleaner)
+[![Coverage Status](https://img.shields.io/coveralls/github/tourze/workerman-core-dump-cleaner.svg?style=flat-square)](https://coveralls.io/github/tourze/workerman-core-dump-cleaner)
 [![License](https://img.shields.io/github/license/tourze/workerman-core-dump-cleaner.svg?style=flat-square)](https://github.com/tourze/workerman-core-dump-cleaner/blob/master/LICENSE)
 
 A simple package to automatically clean up core dump files in Workerman applications.
@@ -41,10 +43,37 @@ new CoreDumpCleaner('/path/to/project', '*/30 * * * * *');
 
 ## Configuration
 
-The constructor accepts two parameters:
+The constructor accepts the following parameters:
 
 - `$projectDir` (string): The directory where core dump files are located
 - `$rule` (string): Cron expression for cleanup schedule (default: `*/30 * * * * *`)
+- `$maxCoreFiles` (int): Maximum number of core files to monitor (default: 20)
+- `$registerCrontab` (bool): Whether to register the cron job automatically (default: true)
+
+### Advanced Usage
+
+```php
+<?php
+
+use Tourze\Workerman\CoreDumpCleaner\CoreDumpCleaner;
+
+// Custom configuration
+$cleaner = new CoreDumpCleaner(
+    projectDir: '/path/to/project',
+    rule: '0 */10 * * * *',           // Every 10 minutes
+    maxCoreFiles: 50,                 // Monitor up to 50 core files
+    registerCrontab: true             // Auto-register cron job
+);
+
+// For testing purposes (disable cron registration)
+$cleaner = new CoreDumpCleaner(
+    projectDir: '/path/to/project',
+    registerCrontab: false
+);
+
+// Manual cleanup
+$results = $cleaner->cleanFiles();
+```
 
 ## Contributing
 

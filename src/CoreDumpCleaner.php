@@ -15,10 +15,10 @@ class CoreDumpCleaner
     private array $checkFiles;
 
     /**
-     * @param string $projectDir Core dump 文件所在的目录
-     * @param string $rule 清理计划的 cron 表达式
-     * @param int $maxCoreFiles 最大监控的 core 文件数量
-     * @param bool $registerCrontab 是否注册定时任务（便于测试时禁用）
+     * @param string $projectDir      Core dump 文件所在的目录
+     * @param string $rule            清理计划的 cron 表达式
+     * @param int    $maxCoreFiles    最大监控的 core 文件数量
+     * @param bool   $registerCrontab 是否注册定时任务（便于测试时禁用）
      */
     public function __construct(
         private string $projectDir,
@@ -46,6 +46,7 @@ class CoreDumpCleaner
             $checkFiles[] = "core.{$i}";
             ++$i;
         }
+
         return $checkFiles;
     }
 
@@ -82,6 +83,7 @@ class CoreDumpCleaner
      * 删除指定文件
      *
      * @param string $file 文件路径
+     *
      * @return bool 删除是否成功
      */
     public function deleteFile(string $file): bool
@@ -99,8 +101,6 @@ class CoreDumpCleaner
 
     /**
      * 获取项目目录
-     *
-     * @return string
      */
     public function getProjectDir(): string
     {
@@ -109,8 +109,6 @@ class CoreDumpCleaner
 
     /**
      * 获取 Cron 规则
-     *
-     * @return string
      */
     public function getRule(): string
     {
@@ -131,7 +129,6 @@ class CoreDumpCleaner
      * 设置检查的文件列表（用于测试）
      *
      * @param array<string> $checkFiles
-     * @return void
      */
     public function setCheckFiles(array $checkFiles): void
     {
@@ -140,9 +137,6 @@ class CoreDumpCleaner
 
     /**
      * 设置项目目录（用于测试）
-     *
-     * @param string $projectDir
-     * @return void
      */
     public function setProjectDir(string $projectDir): void
     {
